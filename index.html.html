@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mediband App Sketch</title>
+    <!-- Tailwind CSS CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <!-- Font Awesome CDN for icons -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <!-- React and ReactDOM CDNs -->
+    <script src="https://unpkg.com/react@17/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@17/umd/react-dom.production.min.js"></script>
+    <!-- Babel CDN for JSX transformation -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <style>
+        /* Optional: Hide scrollbar for a cleaner mobile app feel */
+        body {
+            -ms-overflow-style: none;  /* IE and Edge */
+            scrollbar-width: none;  /* Firefox */
+        }
+        body::-webkit-scrollbar {
+            display: none; /* Chrome, Safari, Opera */
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        function App() {
+            const [currentScreen, setCurrentScreen] = React.useState('welcome');
+            const [isLoggedIn, setIsLoggedIn] = React.useState(false);
+            const [braceletConnected, setBraceletConnected] = React.useState(false);
+            const [activeTab, setActiveTab] = React.useState('home');
+            const [dataView, setDataView] = React.useState('week');
+            const [dataCategory, setDataCategory] = React.useState('heart');
+            const [showSuccess, setShowSuccess] = React.useState(false);
+
+            // Welcome Screen
+            const WelcomeScreen = () => (
+                <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white flex flex-col items-center justify-center p-6">
+                    <div className="text-center mb-12">
+                        <div className="w-24 h-24 bg-gradient-to-br from-blue-400 to-teal-300 rounded-full mx-auto mb-6 flex items-center justify-center">
+                            <i className="fas fa-heartbeat text-white text-4xl"></i>
+                        </div>
+                        <h1 className="text-4xl font-bold text-gray-800 mb-3">Mediband</h1>
+                        <p className="text-xl text-gray-600 italic">Track. Prevent. Improve.</p>
+                    </div>
+                    
+                    <div className="w-full max-w-sm space-y-4">
+                        <button 
+                            onClick={() => { setIsLoggedIn(true); setCurrentScreen(braceletConnected ? 'dashboard' : 'activation'); }}
+                            className="w-full bg-blue-500 text-white py-4 rounded-xl font-semibold hover:bg-blue-600 transition shadow-lg"
+                        >
+                            Log In
+                        </button>
+                        <button 
+                            onClick={() => { setIsLoggedIn(true); setCurrentScreen('activation'); }}
+                            className="w-full bg-teal-400 text-white py-4 rounded-xl font-semibold hover:bg-teal-500 transition shadow-lg"
+                        >
+                            Sign Up
+                        </button>
+                        <button 
+                            onClick={() => { setIsLoggedIn(false); setCurrentScreen('dashboard'); }}
+                            className="w-full bg-gray-200 text-gray-700 py-4 rounded-xl font-semibold hover:bg-gray-300 transition"
+                        >
+                            Continue as Guest
+                        </button>
+                    </div>
+                </div>
+            );
+
+            // Activation Screen
+            const ActivationScreen = () => (
+                <div className="min-h-screen bg-white p-6">
+                    <button onClick={() => setCurrentScreen('welcome')} className="text-blue-500 mb-6">
+                        <i className="fas fa-arrow-left mr-2"></i>Back
+                    </button>
+                    
+                    <div className="max-w-md mx-auto mt-12">
+                        <div className="text-center mb-8">
+                            <div className="w-20 h-20 bg-blue-100 rounded-full mx-auto mb-4 flex items-center justify-center">
+                                <i className="fas fa-link text-blue-500 text-3xl"></i>
+                            </div>
+                            <h2 className="text-2xl font-bold text-gray-800 mb-2">Connect Your Mediband</h2>
+                            <p className="text-gray-600">Enter the code from your bracelet packaging</p>
+                        </div>
+
+                        {!showSuccess ? (
+                            <div>
+                                <input 
+                                    type="text" 
+                                    placeholder="Enter bracelet code (e.g., MB-12345)"
+                                    className="w-full border-2 border-gray-300 rounded-xl p-4 mb-4 focus:border-blue-500 outline-none"
+                                />
+                                <button 
+                                    onClick={() => { setShowSuccess(true); setTimeout(() => { setBraceletConnected(true); setCurrentScreen('dashboard'); }, 2000); }}
+                                    className="w-full bg-blue-500 text-white py-4 rounded-xl font-semibold hover:bg-blue-600 transition"
+                                >
+                                    Connect Device
+                                </button>
+                                
+                                <div className="text-center mt-8">
+                                    <p className="text-gray-600 mb-3">Don't have a Mediband yet?</p>
+                                    <button 
+                                        onClick={() => { setActiveTab('shop'); setCurrentScreen('dashboard'); }}
+                                        className="text-teal-500 font-semibold hover:underline"
+                                    >
+                                        Buy a Mediband →
+                                    </button>
+                                </div>
+                            </div>
+                        ) : (
+                            <div className="text-center py-12">
+                                <div className="w-24 h-24 bg-green-100 rounded-full mx-auto mb-4 flex items-center justify-center animate-pulse">
+                                    <i className="fas fa-check text-green-500 text-4xl"></i>
+                                </div>
+                                <h3 className="text-xl font-bold text-gray-800 mb-2">Successfully Connected!</h3>
+                                <p className="text-gray-600">Redirecting to dashboard...</p>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            );
+
+            // Dashboard Home
+            const DashboardHome = () => (
+                <div className="pb-24">
+                    <div className="bg-gradient-to-r from-blue-500 to-teal-400 text-white p-6 rounded-b-3xl">
+                        <h2 className="text-2xl font-bold mb-1">Welcome back!</h2>
+                        <p className="text-blue-100">Here's your health summary</p>
+                    </div>
+
+                    <div className="p-6 -mt-6">
+                        <div className="grid grid-cols-2 gap-4 mb-6">
+                            <div className="bg-white rounded-2xl p-5 shadow-md">
+                                <div className="flex items-center justify-between mb-3">
+                                    <i className="fas fa-heartbeat text-red-400 text-2xl"></i>
+                                    <span className="text-xs text-gray-500">Now</span>
+                                </div>
+                                <p className="text-3xl font-bold text-gray-800">72</p>
+                                <p className="text-sm text-gray-600">Heart Rate</p>
+                            </div>
+
+                            <div className="bg-white rounded-2xl p-5 shadow-md">
+                                <div className="flex items-center justify-between mb-3">
+                                    <i className="fas fa-brain text-purple-400 text-2xl"></i>
+                                    <span className="text-xs text-gray-500">Today</span>
+                                </div>
+                                <p className="text-3xl font-bold text-gray-800">Low</p>
+                                <p className="text-sm text-gray-600">Stress Level</p>
+                            </div>
+
+                            <div className="bg-white rounded-2xl p-5 shadow-md">
+                                <div className="flex items-center justify-between mb-3">
+                                    <i className="fas fa-moon text-indigo-400 text-2xl"></i>
+                                    <span className="text-xs text-gray-500">Last night</span>
+                                </div>
+                                <p className="text-3xl font-bold text-gray-800">8.2</p>
+                                <p className="text-sm text-gray-600">Sleep Score</p>
+                            </div>
+
+                            <div className="bg-white rounded-2xl p-5 shadow-md">
+                                <div className="flex items-center justify-between mb-3">
+                                    <i className="fas fa-tint text-blue-400 text-2xl"></i>
+                                    <span className="text-xs text-gray-500">Today</span>
+                                </div>
+                                <p className="text-3xl font-bold text-gray-800">1.2L</p>
+                                <p className="text-sm text-gray-600">Hydration</p>
+                            </div>
+                        </div>
+
+                        <button 
+                            onClick={() => setActiveTab('data')}
+                            className="w-full bg-gradient-to-r from-blue-500 to-teal-400 text-white py-4 rounded-xl font-semibold shadow-lg hover:shadow-xl transition"
+                        >
+                            View Full Report
+                        </button>
+
+                        <div className="mt-6 bg-teal-50 rounded-2xl p-5">
+                            <div className="flex items-start">
+                                <i className="fas fa-lightbulb text-teal-500 text-xl mr-3 mt-1"></i>
+                                <div>
+                                    <h4 className="font-semibold text-gray-800 mb-1">Daily Insight</h4>
+                                    <p className="text-sm text-gray-600">Your sleep quality improved by 12% this week. Keep maintaining your bedtime routine!</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+
+            // Data Visualization
+            const DataVisualization = () => (
+                <div className="pb-24">
+                    <div className="bg-white p-6 border-b">
+                        <h2 className="text-2xl font-bold text-gray-800 mb-4">Health Trends</h2>
+                        
+                        <div className="flex gap-2 mb-4">
+                            {['week', 'month', 'year'].map(view => (
+                                <button
+                                    key={view}
+                                    onClick={() => setDataView(view)}
+                                    className={`px-4 py-2 rounded-lg font-semibold capitalize transition ${
+                                        dataView === view 
+                                            ? 'bg-blue-500 text-white' 
+                                            : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                                    }`}
+                                >
+                                    {view}
+                                </button>
+                            ))}
+                        </div>
+
+                        <div className="flex gap-2 overflow-x-auto">
+                            {[
+                                { id: 'heart', label: 'Heart Rate', icon: 'fa-heartbeat' },
+                                { id: 'sleep', label: 'Sleep', icon: 'fa-moon' },
+                                { id: 'activity', label: 'Activity', icon: 'fa-running' },
+                                { id: 'stress', label: 'Stress', icon: 'fa-brain' }
+                            ].map(cat => (
+                                <button
+                                    key={cat.id}
+                                    onClick={() => setDataCategory(cat.id)}
+                                    className={`px-4 py-2 rounded-lg font-semibold whitespace-nowrap transition ${
+                                        dataCategory === cat.id 
+                                            ? 'bg-teal-400 text-white' 
+                                            : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                                    }`}
+                                >
+                                    <i className={`fas ${cat.icon} mr-2`}></i>
+                                    {cat.label}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+
+                    <div className="p-6">
+                        <div className="bg-white rounded-2xl p-6 shadow-md mb-6">
+                            <h3 className="font-bold text-gray-800 mb-4 capitalize">{dataCategory} - {dataView}</h3>
+                            <div className="h-48 bg-gradient-to-t from-blue-50 to-transparent rounded-xl flex items-end justify-around p-4">
+                                {[65, 80, 72, 85, 78, 88, 75].map((height, i) => (
+                                    <div key={i} className="flex flex-col items-center">
+                                        <div 
+                                            style={{ height: `${height}%` }}
+                                            className="w-8 bg-gradient-to-t from-blue-500 to-teal-400 rounded-t-lg transition-all hover:opacity-80"
+                                        ></div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+
+                        <div className="bg-blue-50 rounded-2xl p-5">
+                            <div className="flex items-start">
+                                <i className="fas fa-chart-line text-blue-500 text-xl mr-3 mt-1"></i>
+                                <div>
+                                    <h4 className="font-semibold text-gray-800 mb-1">Insight</h4>
+                                    <p className="text-sm text-gray-600">Your stress levels are improving by 15% this month! Keep up the great work.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+
+            // Shop Tab
+            const ShopTab = () => (
+                <div className="pb-24">
+                    <div className="bg-gradient-to-r from-teal-400 to-blue-500 text-white p-6 rounded-b-3xl">
+                        <h2 className="text-2xl font-bold">Shop Mediband</h2>
+                        <p className="text-blue-100">Find your perfect health companion</p>
+                    </div>
+
+                    <div className="p-6 space-y-4">
+                        {[
+                            { name: 'Mediband Pro', price: '$149', color: 'Black', features: 'Advanced sensors, 7-day battery' },
+                            { name: 'Mediband Lite', price: '$99', color: 'White', features: 'Essential tracking, 5-day battery' },
+                            { name: 'Mediband Sport', price: '$129', color: 'Blue', features: 'Water-resistant, GPS tracking' }
+                        ].map((product, i) => (
+                            <div key={i} className="bg-white rounded-2xl p-5 shadow-md">
+                                <div className="flex items-center mb-3">
+                                    <div className="w-16 h-16 bg-gradient-to-br from-blue-400 to-teal-300 rounded-xl mr-4"></div>
+                                    <div className="flex-1">
+                                        <h3 className="font-bold text-gray-800">{product.name}</h3>
+                                        <p className="text-sm text-gray-600">{product.color}</p>
+                                    </div>
+                                    <p className="text-xl font-bold text-blue-500">{product.price}</p>
+                                </div>
+                                <p className="text-sm text-gray-600 mb-3">{product.features}</p>
+                                <button className="w-full bg-blue-500 text-white py-3 rounded-xl font-semibold hover:bg-blue-600 transition">
+                                    Buy Now
+                                </button>
+                            </div>
+                        ))}
+
+                        <div className="bg-teal-50 rounded-2xl p-5 mt-6">
+                            <h3 className="font-bold text-gray-800 mb-2">Accessories</h3>
+                            <div className="space-y-2">
+                                <div className="flex justify-between items-center">
+                                    <span className="text-gray-700">Extra Bands (3-pack)</span>
+                                    <span className="font-semibold text-teal-600">$29</span>
+                                </div>
+                                <div className="flex justify-between items-center">
+                                    <span className="text-gray-700">Charging Dock</span>
+                                    <span className="font-semibold text-teal-600">$19</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+
+            // Info Tab
+            const InfoTab = () => (
+                <div className="pb-24">
+                    <div className="bg-white p-6 border-b">
+                        <h2 className="text-2xl font-bold text-gray-800">Learn More</h2>
+                    </div>
+
+                    <div className="p-6 space-y-4">
+                        <div className="bg-white rounded-2xl p-5 shadow-md">
+                            <div className="flex items-center mb-3">
+                                <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mr-4">
+                                    <i className="fas fa-info-circle text-blue-500 text-xl"></i>
+                                </div>
+                                <h3 className="font-bold text-gray-800">How It Works</h3>
+                            </div>
+                            <p className="text-sm text-gray-600">Mediband uses advanced biosensors to monitor your heart rate, sleep patterns, activity levels, and stress indicators in real-time.</p>
+                        </div>
+
+                        <div className="bg-white rounded-2xl p-5 shadow-md">
+                            <div className="flex items-center mb-3">
+                                <div className="w-12 h-12 bg-teal-100 rounded-xl flex items-center justify-center mr-4">
+                                    <i className="fas fa-shield-alt text-teal-500 text-xl"></i>
+                                </div>
+                                <h3 className="font-bold text-gray-800">Privacy & Security</h3>
+                            </div>
+                            <p className="text-sm text-gray-600">Your health data is encrypted end-to-end and stored securely. We never share your personal information with third parties.</p>
+                        </div>
+
+                        <div className="bg-white rounded-2xl p-5 shadow-md">
+                            <div className="flex items-center mb-3">
+                                <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center mr-4">
+                                    <i className="fas fa-question-circle text-purple-500 text-xl"></i>
+                                </div>
+                                <h3 className="font-bold text-gray-800">FAQs</h3>
+                            </div>
+                            <div className="space-y-3 text-sm">
+                                <div>
+                                    <p className="font-semibold text-gray-800">How long does the battery last?</p>
+                                    <p className="text-gray-600">5-7 days depending on usage and model.</p>
+                                </div>
+                                <div>
+                                    <p className="font-semibold text-gray-800">Is it waterproof?</p>
+                                    <p className="text-gray-600">Yes, water-resistant up to 50 meters.</p>
+                                </div>
+                                <div>
+                                    <p className="font-semibold text-gray-800">Can I sync with other apps?</p>
+                                    <p className="text-gray-600">Yes, compatible with Apple Health and Google Fit.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+
+            // Profile Tab
+            const ProfileTab = () => (
+                <div className="pb-24">
+                    <div className="bg-gradient-to-r from-blue-500 to-teal-400 text-white p-6 rounded-b-3xl">
+                        <div className="flex items-center">
+                            <div className="w-20 h-20 bg-white rounded-full mr-4 flex items-center justify-center">
+                                <i className="fas fa-user text-blue-500 text-3xl"></i>
+                            </div>
+                            <div>
+                                <h2 className="text-2xl font-bold">{isLoggedIn ? 'John Doe' : 'Guest User'}</h2>
+                                <p className="text-blue-100">{isLoggedIn ? 'john.doe@email.com' : 'Limited access'}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="p-6 space-y-4">
+                        <div className="bg-white rounded-2xl p-5 shadow-md">
+                            <h3 className="font-bold text-gray-800 mb-3">Connected Devices</h3>
+                            {braceletConnected ? (
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center">
+                                        <i className="fas fa-check-circle text-green-500 mr-3"></i>
+                                        <span className="text-gray-700">Mediband Pro</span>
+                                    </div>
+                                    <span className="text-sm text-gray-500">Connected</span>
+                                </div>
+                            ) : (
+                                <p className="text-gray-600 text-sm">No devices connected</p>
+                            )}
+                        </div>
+
+                        <div className="bg-white rounded-2xl p-5 shadow-md space-y-3">
+                            <button className="w-full flex items-center justify-between py-2">
+                                <span className="text-gray-700"><i className="fas fa-bell mr-3 text-blue-500"></i>Notifications</span>
+                                <i className="fas fa-chevron-right text-gray-400"></i>
+                            </button>
+                            <button className="w-full flex items-center justify-between py-2">
+                                <span className="text-gray-700"><i className="fas fa-cog mr-3 text-blue-500"></i>Settings</span>
+                                <i className="fas fa-chevron-right text-gray-400"></i>
+                            </button>
+                            <button className="w-full flex items-center justify-between py-2">
+                                <span className="text-gray-700"><i className="fas fa-lock mr-3 text-blue-500"></i>Privacy</span>
+                                <i className="fas fa-chevron-right text-gray-400"></i>
+                            </button>
+                        </div>
+
+                        <button 
+                            onClick={() => { setIsLoggedIn(false); setBraceletConnected(false); setCurrentScreen('welcome'); }}
+                            className="w-full bg-red-500 text-white py-4 rounded-xl font-semibold hover:bg-red-600 transition"
+                        >
+                            <i className="fas fa-sign-out-alt mr-2"></i>
+                            {isLoggedIn ? 'Log Out' : 'Return to Welcome'}
+                        </button>
+                    </div>
+                </div>
+            );
+
+            // Bottom Navigation
+            const BottomNav = () => (
+                <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-6 py-3 flex justify-around items-center shadow-lg">
+                    {[
+                        { id: 'home', icon: 'fa-home', label: 'Home' },
+                        { id: 'data', icon: 'fa-chart-bar', label: 'Data' },
+                        { id: 'shop', icon: 'fa-shopping-bag', label: 'Shop' },
+                        { id: 'info', icon: 'fa-book', label: 'Learn' },
+                        { id: 'profile', icon: 'fa-user', label: 'Profile' }
+                    ].map(tab => (
+                        <button
+                            key={tab.id}
+                            onClick={() => setActiveTab(tab.id)}
+                            className={`flex flex-col items-center transition ${
+                                activeTab === tab.id ? 'text-blue-500' : 'text-gray-400'
+                            }`}
+                        >
+                            <i className={`fas ${tab.icon} text-xl mb-1`}></i>
+                            <span className="text-xs">{tab.label}</span>
+                        </button>
+                    ))}
+                </div>
+            );
+
+            return (
+                <div className="max-w-md mx-auto bg-gray-50 min-h-screen relative">
+                    {currentScreen === 'welcome' && <WelcomeScreen />}
+                    {currentScreen === 'activation' && <ActivationScreen />}
+                    {currentScreen === 'dashboard' && (
+                        <>
+                            {activeTab === 'home' && <DashboardHome />}
+                            {activeTab === 'data' && <DataVisualization />}
+                            {activeTab === 'shop' && <ShopTab />}
+                            {activeTab === 'info' && <InfoTab />}
+                            {activeTab === 'profile' && <ProfileTab />}
+                            <BottomNav />
+                        </>
+                    )}
+                </div>
+            );
+        }
+
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+</html> 
